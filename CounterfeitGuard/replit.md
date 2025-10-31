@@ -10,16 +10,21 @@ A CNN-based web application that detects whether a currency note is genuine or f
 - **Frontend**: Simple HTML/CSS interface for image uploads
 
 ## Recent Changes
-- **Model Trained Successfully** (Oct 31, 2025)
-  - Training Accuracy: 100%
-  - Validation Accuracy: 98.33% (EXCEEDS >96% TARGET!)
-  - Dataset: 300 images (240 training, 60 validation)
-  - Images: 120 genuine + 120 fake (training), 30 genuine + 30 fake (validation)
-- Initial project setup (Oct 31, 2025)
-- Created project structure with model, static, and templates directories
-- Set up requirements.txt with TensorFlow, Flask, OpenCV, and other dependencies
-- Fixed critical normalization pipeline for optimal MobileNetV2 performance
-- Installed system dependencies (libglvnd, X11 libraries) for OpenCV support
+- **Replit Environment Setup** (Oct 31, 2025)
+  - Imported from GitHub and configured for Replit
+  - Python 3.11 module installed
+  - All dependencies installed (TensorFlow 2.15, Flask 3.0, OpenCV, etc.)
+  - Workflow configured to run Flask app on port 5000 with webview
+  - Deployment configuration set up (autoscale mode)
+  - Created model and uploads directories
+  - MobileNetV2 pretrained weights downloaded successfully
+  - Demo model created (no trained model yet - needs dataset)
+  - Web interface verified and working
+- **Previous Development** (Before import)
+  - Model architecture created with MobileNetV2 transfer learning
+  - Training scripts completed (train_model.py)
+  - Grad-CAM visualization implemented
+  - Web interface designed
 
 ## Tech Stack
 - Python 3.11
