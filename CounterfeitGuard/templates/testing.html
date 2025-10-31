@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Testing - Fake Currency Detector</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .nav-links {
+            margin-top: 15px;
+        }
+
+        .nav-links a {
+            color: #667eea;
+            text-decoration: none;
+            margin-right: 20px;
+            font-weight: 500;
+        }
+
+        .nav-links a:hover {
+            text-decoration: underline;
+        }
+
+        .section {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .section-title {
+            font-size: 1.5em;
+            color: #333;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #667eea;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .info-card {
+            background: #f8f9ff;
+            padding: 15px;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+        }
+
+        .info-label {
+            font-weight: 600;
+            color: #666;
+            font-size: 0.9em;
+            margin-bottom: 5px;
+        }
+
+        .info-value {
+            color: #333;
+            font-size: 1.1em;
+        }
+
+        .model-status {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.9em;
+        }
+
+        .status-demo {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status-trained {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .upload-area {
+            border: 3px dashed #667eea;
+            border-radius: 15px;
+            padding: 40px;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            margin-bottom: 20px;
+        }
+
+        .upload-area:hover {
+            border-color: #764ba2;
+            background: #f8f9ff;
+        }
+
+        #testFileInput {
+            display: none;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+            margin: 5px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+        }
+
+        .test-results {
+            display: none;
+            margin-top: 20px;
+        }
+
+        .result-item {
+            background: #f8f9ff;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .result-genuine {
+            border-left: 5px solid #4caf50;
+        }
+
+        .result-fake {
+            border-left: 5px solid #f44336;
+        }
+
+        .layers-list {
+            max-height: 400px;
+            overflow-y: auto;
+            background: #f8f9ff;
+            padding: 15px;
+            border-radius: 10px;
+        }
+
+        .layer-item {
+            padding: 10px;
+            margin-bottom: 8px;
+            background: white;
+            border-radius: 5px;
+            border-left: 3px solid #667eea;
+        }
+
+        .layer-name {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .layer-type {
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .preview-image {
+            max-width: 200px;
+            max-height: 200px;
+            border-radius: 10px;
+            margin: 10px;
+        }
+
+        .error {
+            background: #ffebee;
+            color: #c62828;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 15px;
+            display: none;
+        }
+
+        .success {
+            background: #e8f5e9;
+            color: #2e7d32;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 15px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🧪 Testing Dashboard</h1>
+            <p style="color: #666; margin-top: 10px;">Test and debug your currency detection model</p>
+            <div class="nav-links">
+                <a href="/">← Back to Main App</a>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2 class="section-title">📊 Model Information</h2>
+            <div class="loading" id="modelLoading">
+                <div class="spinner"></div>
+                <p style="margin-top: 10px; color: #666;">Loading model information...</p>
+            </div>
+            <div id="modelInfo"></div>
+        </div>
+
+        <div class="section">
+            <h2 class="section-title">🔬 Quick Test</h2>
+            <div class="upload-area" id="testUploadArea">
+                <div style="font-size: 3em; margin-bottom: 15px;">📸</div>
+                <div style="font-size: 1.2em; margin-bottom: 10px;">Upload Currency Image for Testing</div>
+                <div style="color: #999; font-size: 0.9em;">PNG, JPG or JPEG (max 16MB)</div>
+                <input type="file" id="testFileInput" accept="image/png,image/jpeg,image/jpg" multiple>
+            </div>
+
+            <div id="previewArea"></div>
+
+            <div style="text-align: center;">
+                <button class="btn" id="testBtn" style="display: none;">Run Test</button>
+                <button class="btn btn-secondary" id="clearBtn" style="display: none;">Clear All</button>
+            </div>
+
+            <div class="loading" id="testLoading">
+                <div class="spinner"></div>
+                <p style="margin-top: 10px; color: #666;">Testing images...</p>
+            </div>
+
+            <div class="error" id="error"></div>
+            <div class="success" id="success"></div>
+
+            <div class="test-results" id="testResults">
+                <h3 style="margin-bottom: 15px;">Test Results:</h3>
+                <div id="resultsContainer"></div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2 class="section-title">🏗️ Model Architecture</h2>
+            <div id="layersInfo" class="layers-list">
+                <p style="color: #666;">Loading layers information...</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let selectedFiles = [];
+        const testUploadArea = document.getElementById('testUploadArea');
+        const testFileInput = document.getElementById('testFileInput');
+        const testBtn = document.getElementById('testBtn');
+        const clearBtn = document.getElementById('clearBtn');
+        const previewArea = document.getElementById('previewArea');
+        const testLoading = document.getElementById('testLoading');
+        const testResults = document.getElementById('testResults');
+        const resultsContainer = document.getElementById('resultsContainer');
+        const errorDiv = document.getElementById('error');
+        const successDiv = document.getElementById('success');
+
+        // Load model information on page load
+        window.addEventListener('DOMContentLoaded', loadModelInfo);
+
+        function loadModelInfo() {
+            document.getElementById('modelLoading').style.display = 'block';
+
+            fetch('/model-info')
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('modelLoading').style.display = 'none';
+                    displayModelInfo(data);
+                    displayLayers(data.layers);
+                })
+                .catch(error => {
+                    document.getElementById('modelLoading').style.display = 'none';
+                    showError('Failed to load model information: ' + error.message);
+                });
+        }
+
+        function displayModelInfo(data) {
+            const statusClass = data.model_type.includes('Demo') ? 'status-demo' : 'status-trained';
+            const html = `
+                <div class="info-grid">
+                    <div class="info-card">
+                        <div class="info-label">Model Status</div>
+                        <div class="info-value">
+                            <span class="model-status ${statusClass}">${data.model_type}</span>
+                        </div>
+                    </div>
+                    <div class="info-card">
+                        <div class="info-label">Total Layers</div>
+                        <div class="info-value">${data.total_layers}</div>
+                    </div>
+                    <div class="info-card">
+                        <div class="info-label">Input Shape</div>
+                        <div class="info-value">${data.input_shape}</div>
+                    </div>
+                    <div class="info-card">
+                        <div class="info-label">Output Classes</div>
+                        <div class="info-value">${data.class_names.join(', ')}</div>
+                    </div>
+                </div>
+            `;
+            document.getElementById('modelInfo').innerHTML = html;
+        }
+
+        function displayLayers(layers) {
+            const html = layers.map(layer => `
+                <div class="layer-item">
+                    <div class="layer-name">${layer.name}</div>
+                    <div class="layer-type">${layer.type} | Output: ${layer.output_shape}</div>
+                </div>
+            `).join('');
+            document.getElementById('layersInfo').innerHTML = html;
+        }
+
+        // File upload handling
+        testUploadArea.addEventListener('click', () => testFileInput.click());
+
+        testFileInput.addEventListener('change', (e) => {
+            handleFiles(Array.from(e.target.files));
+        });
+
+        testUploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            testUploadArea.style.background = '#e8ecff';
+        });
+
+        testUploadArea.addEventListener('dragleave', () => {
+            testUploadArea.style.background = '';
+        });
+
+        testUploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            testUploadArea.style.background = '';
+            handleFiles(Array.from(e.dataTransfer.files));
+        });
+
+        function handleFiles(files) {
+            selectedFiles = files;
+            displayPreviews(files);
+            testBtn.style.display = 'inline-block';
+            clearBtn.style.display = 'inline-block';
+            testResults.style.display = 'none';
+            errorDiv.style.display = 'none';
+            successDiv.style.display = 'none';
+        }
+
+        function displayPreviews(files) {
+            previewArea.innerHTML = '';
+            files.forEach(file => {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const img = document.createElement('img');
+                    img.src = e.target.result;
+                    img.className = 'preview-image';
+                    previewArea.appendChild(img);
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+
+        clearBtn.addEventListener('click', () => {
+            selectedFiles = [];
+            previewArea.innerHTML = '';
+            testBtn.style.display = 'none';
+            clearBtn.style.display = 'none';
+            testResults.style.display = 'none';
+            testFileInput.value = '';
+        });
+
+        testBtn.addEventListener('click', async () => {
+            if (selectedFiles.length === 0) return;
+
+            testLoading.style.display = 'block';
+            testResults.style.display = 'none';
+            errorDiv.style.display = 'none';
+            successDiv.style.display = 'none';
+            resultsContainer.innerHTML = '';
+
+            let successCount = 0;
+            const results = [];
+
+            for (const file of selectedFiles) {
+                try {
+                    const formData = new FormData();
+                    formData.append('file', file);
+
+                    const response = await fetch('/predict', {
+                        method: 'POST',
+                        body: formData
+                    });
+
+                    const data = await response.json();
+
+                    if (response.ok) {
+                        successCount++;
+                        results.push({
+                            filename: file.name,
+                            success: true,
+                            data: data
+                        });
+                    } else {
+                        results.push({
+                            filename: file.name,
+                            success: false,
+                            error: data.error
+                        });
+                    }
+                } catch (error) {
+                    results.push({
+                        filename: file.name,
+                        success: false,
+                        error: error.message
+                    });
+                }
+            }
+
+            testLoading.style.display = 'none';
+            displayResults(results);
+            
+            if (successCount > 0) {
+                showSuccess(`Successfully tested ${successCount} out of ${selectedFiles.length} images`);
+            }
+        });
+
+        function displayResults(results) {
+            const html = results.map(result => {
+                if (result.success) {
+                    const resultClass = result.data.is_genuine ? 'result-genuine' : 'result-fake';
+                    return `
+                        <div class="result-item ${resultClass}">
+                            <div>
+                                <strong>${result.filename}</strong><br>
+                                <span style="font-size: 1.2em;">${result.data.prediction}</span> 
+                                (${result.data.confidence}% confidence)
+                            </div>
+                            <div style="text-align: right;">
+                                <div>Fake: ${result.data.probabilities.fake}%</div>
+                                <div>Genuine: ${result.data.probabilities.genuine}%</div>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    return `
+                        <div class="result-item" style="border-left: 5px solid #ff9800;">
+                            <div>
+                                <strong>${result.filename}</strong><br>
+                                <span style="color: #ff9800;">Error: ${result.error}</span>
+                            </div>
+                        </div>
+                    `;
+                }
+            }).join('');
+
+            resultsContainer.innerHTML = html;
+            testResults.style.display = 'block';
+        }
+
+        function showError(message) {
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+            setTimeout(() => {
+                errorDiv.style.display = 'none';
+            }, 5000);
+        }
+
+        function showSuccess(message) {
+            successDiv.textContent = message;
+            successDiv.style.display = 'block';
+            setTimeout(() => {
+                successDiv.style.display = 'none';
+            }, 5000);
+        }
+    </script>
+</body>
+</html>

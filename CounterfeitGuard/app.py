@@ -249,6 +249,44 @@ def get_gradcam(filename):
     return jsonify({'error': 'File not found'}), 404
 
 
+@app.route('/testing')
+def testing():
+    """Serve testing page with model information"""
+    return render_template('testing.html')
+
+
+@app.route('/model-info')
+def model_info():
+    """Return model information for testing"""
+    if model is None:
+        return jsonify({'error': 'Model not loaded'}), 500
+    
+    try:
+        # Get model summary
+        layer_info = []
+        for layer in model.layers:
+            layer_info.append({
+                'name': layer.name,
+                'type': layer.__class__.__name__,
+                'output_shape': str(layer.output_shape) if hasattr(layer, 'output_shape') else 'N/A'
+            })
+        
+        # Check if model is trained or demo
+        model_path = 'model/currency_detector.h5'
+        is_trained = os.path.exists(model_path)
+        
+        return jsonify({
+            'model_type': 'Trained Model' if is_trained else 'Demo Model (Random Weights)',
+            'total_layers': len(model.layers),
+            'layers': layer_info,
+            'input_shape': str(model.input_shape),
+            'output_shape': str(model.output_shape),
+            'class_names': class_names
+        })
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
 if __name__ == '__main__':
     # Load model at startup
     load_model_file()

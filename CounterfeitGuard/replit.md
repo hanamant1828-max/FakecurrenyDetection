@@ -10,6 +10,13 @@ A CNN-based web application that detects whether a currency note is genuine or f
 - **Frontend**: Simple HTML/CSS interface for image uploads
 
 ## Recent Changes
+- **Testing Dashboard Added** (Oct 31, 2025)
+  - Created comprehensive testing page at `/testing`
+  - Model information display (status, layers, input/output shapes)
+  - Batch image testing capability
+  - Model architecture inspector showing all layers
+  - Quick test results with confidence scores
+  - Link from main app to testing dashboard
 - **Grad-CAM Layer Fix** (Oct 31, 2025)
   - Fixed Grad-CAM function to auto-detect the correct convolutional layer
   - Updated make_gradcam_heatmap to access layers within MobileNetV2 base model
