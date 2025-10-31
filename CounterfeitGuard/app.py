@@ -66,24 +66,53 @@ def preprocess_image(image_path, target_size=(224, 224)):
     return img_array, img
 
 
-def make_gradcam_heatmap(img_array, model, last_conv_layer_name='Conv_1', pred_index=None):
+def make_gradcam_heatmap(img_array, model, last_conv_layer_name=None, pred_index=None):
     """
     Generate Grad-CAM heatmap for model interpretability
     
     Args:
         img_array: Preprocessed image array
         model: Trained model
-        last_conv_layer_name: Name of last convolutional layer
+        last_conv_layer_name: Name of last convolutional layer (auto-detected if None)
         pred_index: Class index for which to compute Grad-CAM
     
     Returns:
         Heatmap array
     """
-    # Create a model that maps input to activations and predictions
-    grad_model = tf.keras.models.Model(
-        [model.inputs],
-        [model.get_layer(last_conv_layer_name).output, model.output]
-    )
+    # Find the MobileNetV2 base model layer
+    base_model = None
+    for layer in model.layers:
+        if 'mobilenet' in layer.name.lower():
+            base_model = layer
+            break
+    
+    # If we found the base model, get the last conv layer from it
+    if base_model is not None and last_conv_layer_name is None:
+        # MobileNetV2's last convolutional layer is 'out_relu' or 'Conv_1'
+        try:
+            last_conv_layer = base_model.get_layer('out_relu')
+        except:
+            try:
+                last_conv_layer = base_model.get_layer('Conv_1')
+            except:
+                # If neither exists, use the last layer with 'conv' in the name
+                for layer in reversed(base_model.layers):
+                    if 'conv' in layer.name.lower():
+                        last_conv_layer = layer
+                        break
+        
+        # Create a model that maps input to activations and predictions
+        grad_model = tf.keras.models.Model(
+            [model.inputs],
+            [last_conv_layer.output, model.output]
+        )
+    else:
+        # Fallback: use layer name if provided or global average pooling
+        layer_name = last_conv_layer_name or 'global_average_pooling2d'
+        grad_model = tf.keras.models.Model(
+            [model.inputs],
+            [model.get_layer(layer_name).output, model.output]
+        )
     
     # Compute gradient of predicted class with respect to feature map
     with tf.GradientTape() as tape:
