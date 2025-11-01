@@ -8,6 +8,18 @@ An AI-powered web application that detects whether a currency note is genuine or
 
 Preferred communication style: Simple, everyday language.
 
+## Recent Changes
+
+### November 1, 2025
+- **Model Training**: Trained MobileNetV2 model with synthetic dataset of 300 currency images (240 training, 60 validation)
+  - Achieved 100% validation accuracy
+  - Model saved at `CounterfeitGuard/model/currency_detector.h5` (14MB)
+  - Application now uses trained model instead of demo model
+- **Upload Storage**: Modified upload directory from project folder to temporary directory (`/tmp/currency_uploads`)
+  - Prevents project folder pollution
+  - Uses secure filename handling to prevent directory traversal attacks
+- **Dataset**: Created synthetic currency dataset at `dataset/train` and `dataset/val` with fake and genuine currency images
+
 ## System Architecture
 
 ### Frontend Architecture
