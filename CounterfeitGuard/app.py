@@ -12,6 +12,7 @@ import cv2
 from PIL import Image
 import os
 import io
+import tempfile
 import matplotlib.pyplot as plt
 from matplotlib import cm
 from werkzeug.utils import secure_filename
@@ -19,7 +20,8 @@ from werkzeug.utils import secure_filename
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'dev-secret-key-change-in-production')
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max file size
-app.config['UPLOAD_FOLDER'] = 'uploads'
+# Use temporary directory for uploads (not stored in project folder)
+app.config['UPLOAD_FOLDER'] = os.path.join(tempfile.gettempdir(), 'currency_uploads')
 
 # Use absolute path for database
 basedir = os.path.abspath(os.path.dirname(__file__))
