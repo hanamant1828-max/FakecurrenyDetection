@@ -77,7 +77,7 @@ def load_model_file():
     else:
         # Create a simple demo model if no trained model exists
         print("No trained model found. Creating demo model...")
-        from model import create_model
+        from CounterfeitGuard.model import create_model
         model = create_model()
         print("Demo model created. Train a real model for better accuracy.")
 

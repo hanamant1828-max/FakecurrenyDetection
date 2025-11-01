@@ -24,7 +24,7 @@ author = "agent"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "cd CounterfeitGuard && python app.py"
+args = "python main.py"
 waitForPort = 5000
 
 [workflows.workflow.metadata]
@@ -35,7 +35,7 @@ localPort = 5000
 externalPort = 80
 
 [[ports]]
-localPort = 43871
+localPort = 43201
 externalPort = 3000
 
 [deployment]
