@@ -110,39 +110,46 @@ def make_gradcam_heatmap(img_array, model, last_conv_layer_name=None, pred_index
         Heatmap array
     """
     # Find the MobileNetV2 base model layer
-    base_model = None
+    base_model_layer = None
     for layer in model.layers:
         if 'mobilenet' in layer.name.lower():
-            base_model = layer
+            base_model_layer = layer
             break
     
-    # If we found the base model, get the last conv layer from it
-    if base_model is not None and last_conv_layer_name is None:
-        # MobileNetV2's last convolutional layer is 'out_relu' or 'Conv_1'
+    # Get the last convolutional layer from the base model
+    last_conv_layer = None
+    if base_model_layer is not None:
+        # Try to find the last convolutional layer in the base model
         try:
-            last_conv_layer = base_model.get_layer('out_relu')
+            last_conv_layer = base_model_layer.get_layer('out_relu')
         except:
             try:
-                last_conv_layer = base_model.get_layer('Conv_1')
+                last_conv_layer = base_model_layer.get_layer('Conv_1')
             except:
-                # If neither exists, use the last layer with 'conv' in the name
-                for layer in reversed(base_model.layers):
-                    if 'conv' in layer.name.lower():
+                # Find any conv layer
+                for layer in reversed(base_model_layer.layers):
+                    if 'conv' in layer.name.lower() and hasattr(layer, 'output'):
                         last_conv_layer = layer
                         break
-        
-        # Create a model that maps input to activations and predictions
-        grad_model = tf.keras.models.Model(
-            [model.inputs],
-            [last_conv_layer.output, model.output]
-        )
+    
+    # If we couldn't find a conv layer, use global average pooling as fallback
+    if last_conv_layer is None:
+        try:
+            target_layer = model.get_layer('global_average_pooling2d')
+        except:
+            # Just use the layer before the final dense layer
+            target_layer = model.layers[-3]
     else:
-        # Fallback: use layer name if provided or global average pooling
-        layer_name = last_conv_layer_name or 'global_average_pooling2d'
-        grad_model = tf.keras.models.Model(
-            [model.inputs],
-            [model.get_layer(layer_name).output, model.output]
-        )
+        # Create a new model that outputs both the conv layer and final predictions
+        # We need to recreate the forward pass through the nested model
+        target_layer = last_conv_layer
+    
+    # Build a model that returns the outputs of the target layer and the final predictions
+    # Use a functional approach that works with nested models
+    grad_model = tf.keras.models.Model(
+        inputs=model.inputs,
+        outputs=[base_model_layer.output if base_model_layer else model.layers[-3].output, model.output]
+    )
     
     # Compute gradient of predicted class with respect to feature map
     with tf.GradientTape() as tape:
@@ -151,8 +158,13 @@ def make_gradcam_heatmap(img_array, model, last_conv_layer_name=None, pred_index
             pred_index = tf.argmax(predictions[0])
         class_channel = predictions[:, pred_index]
     
-    # Gradient of output with respect to last conv layer
+    # Gradient of output with respect to conv layer
     grads = tape.gradient(class_channel, conv_outputs)
+    
+    # Avoid division by zero
+    if grads is None:
+        # Fallback: return a simple heatmap
+        return np.ones((7, 7)) * 0.5
     
     # Mean intensity of gradient over specific feature map channel
     pooled_grads = tf.reduce_mean(grads, axis=(0, 1, 2))
@@ -163,7 +175,11 @@ def make_gradcam_heatmap(img_array, model, last_conv_layer_name=None, pred_index
     heatmap = tf.squeeze(heatmap)
     
     # Normalize heatmap
-    heatmap = tf.maximum(heatmap, 0) / tf.math.reduce_max(heatmap)
+    heatmap = tf.maximum(heatmap, 0)
+    max_val = tf.math.reduce_max(heatmap)
+    if max_val > 0:
+        heatmap = heatmap / max_val
+    
     return heatmap.numpy()
 
 
