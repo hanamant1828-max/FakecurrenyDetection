@@ -333,16 +333,24 @@ def predict():
         confidence = float(predictions[0][predicted_class]) * 100
         
         # Generate Grad-CAM heatmap
-        heatmap = make_gradcam_heatmap(img_array, model, pred_index=predicted_class)
-        
-        # Create overlay image
-        gradcam_bytes = overlay_heatmap(heatmap, original_img)
-        
-        # Save Grad-CAM image
-        gradcam_filename = f'gradcam_{filename}'
-        gradcam_path = os.path.join(app.config['UPLOAD_FOLDER'], gradcam_filename)
-        with open(gradcam_path, 'wb') as f:
-            f.write(gradcam_bytes.read())
+        try:
+            heatmap = make_gradcam_heatmap(img_array, model, pred_index=predicted_class)
+            
+            # Create overlay image
+            gradcam_bytes = overlay_heatmap(heatmap, original_img)
+            
+            # Save Grad-CAM image
+            gradcam_filename = f'gradcam_{filename}'
+            gradcam_path = os.path.join(app.config['UPLOAD_FOLDER'], gradcam_filename)
+            with open(gradcam_path, 'wb') as f:
+                f.write(gradcam_bytes.read())
+            
+            gradcam_url = f'/gradcam/{gradcam_filename}'
+        except Exception as gradcam_error:
+            print(f"Grad-CAM error: {str(gradcam_error)}")
+            import traceback
+            traceback.print_exc()
+            gradcam_url = None
         
         # Prepare response
         result = {
@@ -352,13 +360,18 @@ def predict():
             'probabilities': {
                 'fake': round(float(predictions[0][0]) * 100, 2),
                 'genuine': round(float(predictions[0][1]) * 100, 2)
-            },
-            'gradcam_image': f'/gradcam/{gradcam_filename}'
+            }
         }
+        
+        if gradcam_url:
+            result['gradcam_image'] = gradcam_url
         
         return jsonify(result)
     
     except Exception as e:
+        print(f"Prediction error: {str(e)}")
+        import traceback
+        traceback.print_exc()
         return jsonify({'error': str(e)}), 500
 
 
