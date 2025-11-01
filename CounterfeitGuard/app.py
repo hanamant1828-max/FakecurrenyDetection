@@ -76,14 +76,15 @@ def load_model_file():
     if model is not None:
         return
     
-    model_path = 'model/currency_detector.h5'
+    # Use absolute path for model
+    model_path = os.path.join(basedir, 'model', 'currency_detector.h5')
     
     if os.path.exists(model_path):
         model = keras.models.load_model(model_path)
         print(f"Model loaded successfully from {model_path}")
     else:
         # Create a simple demo model if no trained model exists
-        print("No trained model found. Creating demo model...")
+        print(f"No trained model found at {model_path}. Creating demo model...")
         from CounterfeitGuard.model import create_model
         model = create_model()
         print("Demo model created. Train a real model for better accuracy.")
