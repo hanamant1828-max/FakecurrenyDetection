@@ -35,9 +35,14 @@ localPort = 5000
 externalPort = 80
 
 [[ports]]
-localPort = 43013
+localPort = 34677
 externalPort = 3000
 
 [deployment]
 deploymentTarget = "autoscale"
 run = ["gunicorn", "--bind", "0.0.0.0:5000", "main:app"]
+
+[userenv]
+
+[userenv.shared]
+SECRET_KEY = "dev-secret-key-change-in-production"
