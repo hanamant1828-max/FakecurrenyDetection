@@ -19,3 +19,5 @@ CounterfeitGuard/model/*.h5
 CounterfeitGuard/model/*.keras
 .cache/
 .keras/
+dataset/
+training_output.log
