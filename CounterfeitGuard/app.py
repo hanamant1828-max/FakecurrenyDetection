@@ -316,6 +316,7 @@ def predict():
     """
     Predict if currency is genuine or fake
     Returns JSON with prediction, confidence, and Grad-CAM visualization
+    EACH REQUEST IS PROCESSED INDEPENDENTLY - NO CACHING!
     """
     if 'file' not in request.files:
         return jsonify({'error': 'No file uploaded'}), 400
@@ -328,48 +329,61 @@ def predict():
     if not allowed_file(file.filename):
         return jsonify({'error': 'Invalid file type. Use PNG, JPG, or JPEG'}), 400
     
+    filepath = None
+    gradcam_path = None
+    
     try:
-        # Save uploaded file
-        filename = secure_filename(file.filename)
-        filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        import time
+        import uuid
+        
+        timestamp = int(time.time() * 1000)
+        unique_id = str(uuid.uuid4())[:8]
+        base_name = secure_filename(file.filename).rsplit('.', 1)[0]
+        extension = secure_filename(file.filename).rsplit('.', 1)[1]
+        
+        unique_filename = f"{base_name}_{timestamp}_{unique_id}.{extension}"
+        filepath = os.path.join(app.config['UPLOAD_FOLDER'], unique_filename)
+        
+        print(f"\n{'='*70}")
+        print(f"NEW PREDICTION REQUEST - {unique_filename}")
+        print(f"{'='*70}")
+        
         file.save(filepath)
+        print(f"[1/5] File saved to: {filepath}")
         
-        # Preprocess image
         img_array, original_img = preprocess_image(filepath)
+        print(f"[2/5] Image preprocessed - Shape: {img_array.shape}, Min: {img_array.min():.3f}, Max: {img_array.max():.3f}")
         
-        # Make prediction
+        tf.keras.backend.clear_session()
+        
         predictions = model.predict(img_array, verbose=0)
+        print(f"[3/5] Model prediction completed")
+        print(f"      Raw predictions: {predictions[0]}")
         
-        # Debug: Print raw predictions
-        print(f"Raw predictions: {predictions[0]}")
-        
-        # Class indices from flow_from_directory (alphabetical):
-        # 0 = 'fake', 1 = 'genuine'
-        # predictions[0] = [prob_fake, prob_genuine]
         fake_prob = float(predictions[0][0]) * 100
         genuine_prob = float(predictions[0][1]) * 100
         
-        print(f"Fake probability: {fake_prob:.2f}%, Genuine probability: {genuine_prob:.2f}%")
+        print(f"[4/5] Probabilities calculated:")
+        print(f"      - Fake:    {fake_prob:.2f}%")
+        print(f"      - Genuine: {genuine_prob:.2f}%")
         
-        # Determine prediction based on which probability is higher
         if genuine_prob > fake_prob:
-            predicted_class = 1  # Genuine
+            predicted_class = 1
             confidence = genuine_prob
-            print("Prediction: Genuine")
+            prediction_label = "GENUINE ₹500 NOTE"
         else:
-            predicted_class = 0  # Fake
+            predicted_class = 0
             confidence = fake_prob
-            print("Prediction: Fake")
+            prediction_label = "FAKE ₹500 NOTE"
         
-        # Generate Grad-CAM heatmap
+        print(f"[5/5] FINAL PREDICTION: {prediction_label} (Confidence: {confidence:.2f}%)")
+        print(f"{'='*70}\n")
+        
         try:
             heatmap = make_gradcam_heatmap(img_array, model, pred_index=predicted_class)
-            
-            # Create overlay image
             gradcam_bytes = overlay_heatmap(heatmap, original_img)
             
-            # Save Grad-CAM image
-            gradcam_filename = f'gradcam_{filename}'
+            gradcam_filename = f'gradcam_{unique_filename}'
             gradcam_path = os.path.join(app.config['UPLOAD_FOLDER'], gradcam_filename)
             with open(gradcam_path, 'wb') as f:
                 f.write(gradcam_bytes.read())
@@ -381,7 +395,6 @@ def predict():
             traceback.print_exc()
             gradcam_url = None
         
-        # Prepare response
         result = {
             'prediction': class_names[predicted_class],
             'confidence': round(confidence, 2),
@@ -390,18 +403,35 @@ def predict():
                 'fake': round(fake_prob, 2),
                 'genuine': round(genuine_prob, 2)
             },
-            'warning': 'This model was trained on synthetic data. Results may not be accurate for real currency.'
+            'warning': 'Model trained on Indian ₹500 notes dataset.',
+            'filename': unique_filename
         }
         
         if gradcam_url:
             result['gradcam_image'] = gradcam_url
         
+        if filepath and os.path.exists(filepath):
+            try:
+                os.remove(filepath)
+                print(f"Cleaned up: {filepath}")
+            except:
+                pass
+        
         return jsonify(result)
     
     except Exception as e:
-        print(f"Prediction error: {str(e)}")
+        print(f"\n{'='*70}")
+        print(f"PREDICTION ERROR: {str(e)}")
+        print(f"{'='*70}\n")
         import traceback
         traceback.print_exc()
+        
+        if filepath and os.path.exists(filepath):
+            try:
+                os.remove(filepath)
+            except:
+                pass
+        
         return jsonify({'error': str(e)}), 500
 
 
