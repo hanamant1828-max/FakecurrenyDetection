@@ -370,7 +370,8 @@ def predict():
             'probabilities': {
                 'fake': round(float(predictions[0][0]) * 100, 2),
                 'genuine': round(float(predictions[0][1]) * 100, 2)
-            }
+            },
+            'warning': 'This model was trained on synthetic data. Results may not be accurate for real currency.'
         }
         
         if gradcam_url:
