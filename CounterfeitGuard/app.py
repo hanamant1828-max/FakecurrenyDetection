@@ -340,17 +340,26 @@ def predict():
         # Make prediction
         predictions = model.predict(img_array, verbose=0)
         
-        # predictions[0] contains [fake_probability, genuine_probability]
+        # Debug: Print raw predictions
+        print(f"Raw predictions: {predictions[0]}")
+        
+        # Class indices from flow_from_directory (alphabetical):
+        # 0 = 'fake', 1 = 'genuine'
+        # predictions[0] = [prob_fake, prob_genuine]
         fake_prob = float(predictions[0][0]) * 100
         genuine_prob = float(predictions[0][1]) * 100
+        
+        print(f"Fake probability: {fake_prob:.2f}%, Genuine probability: {genuine_prob:.2f}%")
         
         # Determine prediction based on which probability is higher
         if genuine_prob > fake_prob:
             predicted_class = 1  # Genuine
             confidence = genuine_prob
+            print("Prediction: Genuine")
         else:
             predicted_class = 0  # Fake
             confidence = fake_prob
+            print("Prediction: Fake")
         
         # Generate Grad-CAM heatmap
         try:
