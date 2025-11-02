@@ -11,22 +11,34 @@ Preferred communication style: Simple, everyday language.
 ## Recent Changes
 
 ### November 2, 2025
-- **Indian Currency Model Training**: Trained specialized model for 50, 200, and 500 rupee notes
-  - Created Indian currency dataset (60 images: 48 training, 12 validation)
-  - Used stock images of genuine notes + synthetic fake versions via data augmentation
-  - Achieved **100% validation accuracy** with perfect metrics (1.0 precision/recall/F1)
-  - All 12 validation samples correctly classified (9 fake + 3 genuine)
-  - Model: `CounterfeitGuard/model/currency_detector.h5` (14MB)
-- **Data Augmentation for Fakes**: Synthetic fake currency created using:
-  - Color distortion (simulates off-color printing)
-  - Gaussian blur (poor print quality)
-  - Sharpness reduction (low-quality materials)
-  - Brightness/contrast variations
-  - Random noise addition
-- **Dataset Organization**: Structured training pipeline
-  - `indian_currency_dataset/train/` (genuine/fake)
-  - `indian_currency_dataset/val/` (genuine/fake)
-  - Training scripts: `create_indian_currency_dataset.py`, `train_indian_currency_model.py`
+- **Kaggle Dataset Integration & Model Training**: Successfully integrated Kaggle API for dataset management
+  - Installed Kaggle package and configured API authentication using environment secrets
+  - Downloaded and organized Indian currency counterfeit detection dataset
+  - Final dataset: 72 training images (32 fake + 40 genuine), 18 validation images (8 fake + 10 genuine)
+  
+- **Two-Phase Transfer Learning Training**:
+  - **Phase 1 (Initial Training)**: Frozen MobileNetV2 base model, 15 epochs
+    - Training accuracy: 100%
+    - Validation accuracy: 94.44%
+    - Early stopping triggered after 12 epochs
+  - **Phase 2 (Fine-Tuning)**: Unfroze last 20 layers, 10 epochs, lower learning rate (0.0001)
+    - Training accuracy: 100%
+    - **Final validation accuracy: 100%**
+    - Improvement: +5.56%
+  - Model saved to: `CounterfeitGuard/model/currency_detector.h5` (14MB)
+  
+- **Training Infrastructure**:
+  - Scripts: `download_kaggle_dataset.py`, `train_indian_currency_model.py`, `complete_training.py`
+  - Callbacks: ModelCheckpoint, EarlyStopping, ReduceLROnPlateau
+  - Data augmentation: rotation, shift, shear, zoom, horizontal flip
+  - Fixed fine-tuning bug by properly identifying MobileNetV2 layer
+  
+- **Model Performance Notes** (from architect review):
+  - Small dataset (90 total images) means 100% accuracy should be interpreted cautiously
+  - Likely overfitting on validation set due to limited samples
+  - Recommendations for future: expand dataset with real captures, implement cross-validation, enhance augmentation
+  
+- **Previous Training**: Initial model with stock images + synthetic fakes
   - Evaluation script: `evaluate_model.py` with confusion matrix visualization
 
 ### November 1, 2025
