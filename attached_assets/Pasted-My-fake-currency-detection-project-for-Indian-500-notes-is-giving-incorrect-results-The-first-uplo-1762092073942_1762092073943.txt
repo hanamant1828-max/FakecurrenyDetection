@@ -1,0 +1,40 @@
+My fake currency detection project for Indian ₹500 notes is giving incorrect results. The first uploaded image's prediction (real or fake) is being applied to all subsequent images. Please fix this issue and retrain the model properly:
+
+1. RETRAIN THE MODEL FROM SCRATCH:
+   - Download or use a Kaggle dataset for Indian ₹500 currency notes (both real and fake)
+   - If no dataset exists, use image augmentation to create synthetic training data
+   - Ensure balanced dataset: equal number of real and fake ₹500 note images
+   - Split data: 80% training, 20% validation
+   - Use CNN architecture with Conv2D, MaxPooling, Dropout, and Dense layers
+   - Input shape: (224, 224, 3)
+   - Output: 2 classes (Real, Fake) with softmax activation
+   - Train for at least 20-30 epochs with early stopping
+   - Save the trained model as 'rupee_500_model.h5'
+
+2. FIX THE PREDICTION CODE:
+   - For EACH image upload, create a completely new prediction:
+     a. Read the uploaded image file fresh
+     b. Preprocess independently: resize to (224, 224), normalize to [0, 1]
+     c. Convert to numpy array and add batch dimension
+     d. Call model.predict() on this NEW array
+     e. Clear any cached results before displaying new prediction
+   - DO NOT store or reuse predictions from previous images
+   - Reset all variables after each prediction
+
+3. PREPROCESSING MUST MATCH:
+   - Training preprocessing: resize to 224x224, normalize pixels /255.0
+   - Prediction preprocessing: EXACTLY the same steps
+   - Use the same image format (RGB, not BGR)
+
+4. WEB INTERFACE:
+   - Single image upload field
+   - "Predict" button that processes only the current uploaded image
+   - Display result: "Real ₹500 Note" or "Fake ₹500 Note" with confidence %
+   - "Clear/Upload Another" button that resets everything
+
+5. DEBUGGING:
+   - Add print statements showing: image shape, preprocessed values, prediction array
+   - Log each prediction independently to verify it's not reusing old results
+   - Test with alternating real and fake images to ensure correct classification
+
+Please ensure the model is properly trained on ₹500 note dataset before making predictions. If dataset is not available, guide me to download it from Kaggle or Roboflow.
