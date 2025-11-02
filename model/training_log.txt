@@ -1,0 +1,147 @@
+2025-11-02 05:35:09.250621: I external/local_tsl/tsl/cuda/cudart_stub.cc:31] Could not find cuda drivers on your machine, GPU will not be used.
+2025-11-02 05:35:09.318254: E external/local_xla/xla/stream_executor/cuda/cuda_dnn.cc:9261] Unable to register cuDNN factory: Attempting to register factory for plugin cuDNN when one has already been registered
+2025-11-02 05:35:09.318509: E external/local_xla/xla/stream_executor/cuda/cuda_fft.cc:607] Unable to register cuFFT factory: Attempting to register factory for plugin cuFFT when one has already been registered
+2025-11-02 05:35:09.321362: E external/local_xla/xla/stream_executor/cuda/cuda_blas.cc:1515] Unable to register cuBLAS factory: Attempting to register factory for plugin cuBLAS when one has already been registered
+2025-11-02 05:35:09.344844: I external/local_tsl/tsl/cuda/cudart_stub.cc:31] Could not find cuda drivers on your machine, GPU will not be used.
+2025-11-02 05:35:09.345288: I tensorflow/core/platform/cpu_feature_guard.cc:182] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+To enable the following instructions: AVX2 FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+2025-11-02 05:35:12.468352: W tensorflow/compiler/tf2tensorrt/utils/py_utils.cc:38] TF-TRT Warning: Could not find TensorRT
+======================================================================
+TRAINING INDIAN CURRENCY COUNTERFEIT DETECTION MODEL
+======================================================================
+Train directory: indian_currency_dataset/train
+Validation directory: indian_currency_dataset/val
+Initial epochs: 15
+Fine-tune epochs: 10
+Batch size: 16
+======================================================================
+Creating MobileNetV2-based model...
+✓ Model created successfully
+
+Model architecture:
+Model: "model"
+_________________________________________________________________
+ Layer (type)                Output Shape              Param #   
+=================================================================
+ input_2 (InputLayer)        [(None, 224, 224, 3)]     0         
+                                                                 
+ tf.math.truediv (TFOpLambd  (None, 224, 224, 3)       0         
+ a)                                                              
+                                                                 
+ tf.math.subtract (TFOpLamb  (None, 224, 224, 3)       0         
+ da)                                                             
+                                                                 
+ mobilenetv2_1.00_224 (Func  (None, 7, 7, 1280)        2257984   
+ tional)                                                         
+                                                                 
+ global_average_pooling2d (  (None, 1280)              0         
+ GlobalAveragePooling2D)                                         
+                                                                 
+ dropout (Dropout)           (None, 1280)              0         
+                                                                 
+ dense (Dense)               (None, 256)               327936    
+                                                                 
+ dropout_1 (Dropout)         (None, 256)               0         
+                                                                 
+ dense_1 (Dense)             (None, 128)               32896     
+                                                                 
+ dense_2 (Dense)             (None, 2)                 258       
+                                                                 
+=================================================================
+Total params: 2619074 (9.99 MB)
+Trainable params: 361090 (1.38 MB)
+Non-trainable params: 2257984 (8.61 MB)
+_________________________________________________________________
+Creating data generators with augmentation...
+Found 48 images belonging to 2 classes.
+Found 12 images belonging to 2 classes.
+✓ Data generators created
+  Classes: {'fake': 0, 'genuine': 1}
+
+Dataset:
+  Training samples: 48
+  Validation samples: 12
+  Classes: {'fake': 0, 'genuine': 1}
+
+======================================================================
+PHASE 1: Initial Training (Frozen Base Model)
+======================================================================
+Epoch 1/15
+1/3 [=========>....................] - ETA: 10s - loss: 0.6483 - accuracy: 0.56252/3 [===================>..........] - ETA: 0s - loss: 0.7805 - accuracy: 0.6562 3/3 [==============================] - ETA: 0s - loss: 1.0188 - accuracy: 0.6667
+Epoch 1: val_accuracy improved from -inf to 0.75000, saving model to model/indian_currency_detector_best.h5
+/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/keras/src/engine/training.py:3103: UserWarning: You are saving your model as an HDF5 file via `model.save()`. This file format is considered legacy. We recommend using instead the native Keras format, e.g. `model.save('my_model.keras')`.
+  saving_api.save_model(
+3/3 [==============================] - 9s 2s/step - loss: 1.0188 - accuracy: 0.6667 - val_loss: 0.5440 - val_accuracy: 0.7500 - lr: 0.0010
+Epoch 2/15
+1/3 [=========>....................] - ETA: 1s - loss: 0.8213 - accuracy: 0.75002/3 [===================>..........] - ETA: 0s - loss: 0.7927 - accuracy: 0.68753/3 [==============================] - ETA: 0s - loss: 0.6978 - accuracy: 0.7083
+Epoch 2: val_accuracy did not improve from 0.75000
+3/3 [==============================] - 3s 956ms/step - loss: 0.6978 - accuracy: 0.7083 - val_loss: 0.5659 - val_accuracy: 0.6667 - lr: 0.0010
+Epoch 3/15
+1/3 [=========>....................] - ETA: 1s - loss: 0.6971 - accuracy: 0.56252/3 [===================>..........] - ETA: 0s - loss: 0.6539 - accuracy: 0.59383/3 [==============================] - ETA: 0s - loss: 0.6242 - accuracy: 0.5625
+Epoch 3: val_accuracy improved from 0.75000 to 0.83333, saving model to model/indian_currency_detector_best.h5
+3/3 [==============================] - 3s 1s/step - loss: 0.6242 - accuracy: 0.5625 - val_loss: 0.4390 - val_accuracy: 0.8333 - lr: 0.0010
+Epoch 4/15
+1/3 [=========>....................] - ETA: 1s - loss: 0.3653 - accuracy: 0.87502/3 [===================>..........] - ETA: 0s - loss: 0.5487 - accuracy: 0.75003/3 [==============================] - ETA: 0s - loss: 0.4646 - accuracy: 0.7917
+Epoch 4: val_accuracy improved from 0.83333 to 1.00000, saving model to model/indian_currency_detector_best.h5
+3/3 [==============================] - 3s 1s/step - loss: 0.4646 - accuracy: 0.7917 - val_loss: 0.2528 - val_accuracy: 1.0000 - lr: 0.0010
+Epoch 5/15
+1/3 [=========>....................] - ETA: 1s - loss: 0.4185 - accuracy: 0.75002/3 [===================>..........] - ETA: 0s - loss: 0.4266 - accuracy: 0.71883/3 [==============================] - ETA: 0s - loss: 0.3559 - accuracy: 0.7708
+Epoch 5: val_accuracy did not improve from 1.00000
+3/3 [==============================] - 3s 871ms/step - loss: 0.3559 - accuracy: 0.7708 - val_loss: 0.2771 - val_accuracy: 0.9167 - lr: 0.0010
+Epoch 6/15
+1/3 [=========>....................] - ETA: 1s - loss: 0.3940 - accuracy: 0.75002/3 [===================>..........] - ETA: 0s - loss: 0.3182 - accuracy: 0.84383/3 [==============================] - ETA: 0s - loss: 0.3390 - accuracy: 0.8125
+Epoch 6: val_accuracy did not improve from 1.00000
+3/3 [==============================] - 2s 805ms/step - loss: 0.3390 - accuracy: 0.8125 - val_loss: 0.2229 - val_accuracy: 0.9167 - lr: 0.0010
+Epoch 7/15
+1/3 [=========>....................] - ETA: 1s - loss: 0.3345 - accuracy: 0.87502/3 [===================>..........] - ETA: 0s - loss: 0.3109 - accuracy: 0.87503/3 [==============================] - ETA: 0s - loss: 0.2851 - accuracy: 0.8958
+Epoch 7: val_accuracy did not improve from 1.00000
+3/3 [==============================] - 3s 886ms/step - loss: 0.2851 - accuracy: 0.8958 - val_loss: 0.2431 - val_accuracy: 0.9167 - lr: 0.0010
+Epoch 8/15
+1/3 [=========>....................] - ETA: 1s - loss: 0.3870 - accuracy: 0.87502/3 [===================>..........] - ETA: 0s - loss: 0.3732 - accuracy: 0.84383/3 [==============================] - ETA: 0s - loss: 0.2878 - accuracy: 0.8750
+Epoch 8: val_accuracy did not improve from 1.00000
+3/3 [==============================] - 3s 813ms/step - loss: 0.2878 - accuracy: 0.8750 - val_loss: 0.1668 - val_accuracy: 0.9167 - lr: 0.0010
+Epoch 9/15
+1/3 [=========>....................] - ETA: 1s - loss: 0.1259 - accuracy: 0.93752/3 [===================>..........] - ETA: 0s - loss: 0.1727 - accuracy: 0.90623/3 [==============================] - ETA: 0s - loss: 0.1680 - accuracy: 0.9167
+Epoch 9: val_accuracy did not improve from 1.00000
+3/3 [==============================] - 2s 860ms/step - loss: 0.1680 - accuracy: 0.9167 - val_loss: 0.0640 - val_accuracy: 1.0000 - lr: 0.0010
+Epoch 10/15
+1/3 [=========>....................] - ETA: 1s - loss: 0.2777 - accuracy: 0.81252/3 [===================>..........] - ETA: 0s - loss: 0.2712 - accuracy: 0.84383/3 [==============================] - ETA: 0s - loss: 0.2067 - accuracy: 0.8750
+Epoch 10: val_accuracy did not improve from 1.00000
+3/3 [==============================] - 2s 872ms/step - loss: 0.2067 - accuracy: 0.8750 - val_loss: 0.1244 - val_accuracy: 1.0000 - lr: 0.0010
+Epoch 11/15
+1/3 [=========>....................] - ETA: 1s - loss: 0.0543 - accuracy: 1.00002/3 [===================>..........] - ETA: 0s - loss: 0.0651 - accuracy: 1.00003/3 [==============================] - ETA: 0s - loss: 0.1216 - accuracy: 0.9583
+Epoch 11: val_accuracy did not improve from 1.00000
+3/3 [==============================] - 2s 720ms/step - loss: 0.1216 - accuracy: 0.9583 - val_loss: 0.2566 - val_accuracy: 0.8333 - lr: 0.0010
+Epoch 12/15
+1/3 [=========>....................] - ETA: 1s - loss: 0.0636 - accuracy: 1.00002/3 [===================>..........] - ETA: 0s - loss: 0.1767 - accuracy: 0.93753/3 [==============================] - ETA: 0s - loss: 0.1329 - accuracy: 0.9583
+Epoch 12: val_accuracy did not improve from 1.00000
+
+Epoch 12: ReduceLROnPlateau reducing learning rate to 0.0005000000237487257.
+3/3 [==============================] - 2s 732ms/step - loss: 0.1329 - accuracy: 0.9583 - val_loss: 0.1472 - val_accuracy: 0.9167 - lr: 0.0010
+Epoch 13/15
+1/3 [=========>....................] - ETA: 1s - loss: 0.0619 - accuracy: 1.00002/3 [===================>..........] - ETA: 0s - loss: 0.2386 - accuracy: 0.96883/3 [==============================] - ETA: 0s - loss: 0.2001 - accuracy: 0.9583
+Epoch 13: val_accuracy did not improve from 1.00000
+3/3 [==============================] - 2s 782ms/step - loss: 0.2001 - accuracy: 0.9583 - val_loss: 0.1055 - val_accuracy: 1.0000 - lr: 5.0000e-04
+Epoch 14/15
+1/3 [=========>....................] - ETA: 1s - loss: 0.0776 - accuracy: 0.93752/3 [===================>..........] - ETA: 0s - loss: 0.0782 - accuracy: 0.93753/3 [==============================] - ETA: 0s - loss: 0.1034 - accuracy: 0.9375
+Epoch 14: val_accuracy did not improve from 1.00000
+Restoring model weights from the end of the best epoch: 9.
+3/3 [==============================] - 3s 944ms/step - loss: 0.1034 - accuracy: 0.9375 - val_loss: 0.0710 - val_accuracy: 1.0000 - lr: 5.0000e-04
+Epoch 14: early stopping
+
+======================================================================
+PHASE 2: Fine-Tuning (Unfreezing Last Layers)
+======================================================================
+
+Fine-tuning: Unfreezing last 20 layers...
+Traceback (most recent call last):
+  File "/home/runner/workspace/train_indian_currency_model.py", line 335, in <module>
+    model, history, history_fine = train_model(
+                                   ^^^^^^^^^^^^
+  File "/home/runner/workspace/train_indian_currency_model.py", line 276, in train_model
+    model = fine_tune_model(model)
+            ^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/workspace/train_indian_currency_model.py", line 84, in fine_tune_model
+    for layer in base_model.layers[:-num_layers_to_unfreeze]:
+                 ^^^^^^^^^^^^^^^^^
+AttributeError: 'TFOpLambda' object has no attribute 'layers'
