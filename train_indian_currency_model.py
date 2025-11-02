@@ -76,8 +76,16 @@ def fine_tune_model(model, num_layers_to_unfreeze=20):
     """
     print(f"\nFine-tuning: Unfreezing last {num_layers_to_unfreeze} layers...")
     
-    # Get the base model
-    base_model = model.layers[2]  # The MobileNetV2 base
+    # Find the MobileNetV2 base model by searching for it
+    base_model = None
+    for layer in model.layers:
+        if 'mobilenet' in layer.name.lower():
+            base_model = layer
+            break
+    
+    if base_model is None:
+        print("Warning: Could not find MobileNetV2 base model. Skipping fine-tuning.")
+        return model
     
     # Unfreeze the last layers
     base_model.trainable = True
