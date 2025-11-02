@@ -119,46 +119,33 @@ def make_gradcam_heatmap(img_array, model, last_conv_layer_name=None, pred_index
     Returns:
         Heatmap array
     """
-    # Find the MobileNetV2 base model layer
     base_model_layer = None
     for layer in model.layers:
         if 'mobilenet' in layer.name.lower():
             base_model_layer = layer
             break
     
-    # Get the last convolutional layer from the base model
+    if base_model_layer is None:
+        return np.ones((7, 7)) * 0.5
+    
     last_conv_layer = None
-    if base_model_layer is not None:
-        # Try to find the last convolutional layer in the base model
+    try:
+        last_conv_layer = base_model_layer.get_layer('Conv_1')
+    except:
         try:
             last_conv_layer = base_model_layer.get_layer('out_relu')
         except:
-            try:
-                last_conv_layer = base_model_layer.get_layer('Conv_1')
-            except:
-                # Find any conv layer
-                for layer in reversed(base_model_layer.layers):
-                    if 'conv' in layer.name.lower() and hasattr(layer, 'output'):
-                        last_conv_layer = layer
-                        break
+            for layer in reversed(base_model_layer.layers):
+                if isinstance(layer, tf.keras.layers.Conv2D):
+                    last_conv_layer = layer
+                    break
     
-    # If we couldn't find a conv layer, use global average pooling as fallback
     if last_conv_layer is None:
-        try:
-            target_layer = model.get_layer('global_average_pooling2d')
-        except:
-            # Just use the layer before the final dense layer
-            target_layer = model.layers[-3]
-    else:
-        # Create a new model that outputs both the conv layer and final predictions
-        # We need to recreate the forward pass through the nested model
-        target_layer = last_conv_layer
+        return np.ones((7, 7)) * 0.5
     
-    # Build a model that returns the outputs of the target layer and the final predictions
-    # Use a functional approach that works with nested models
     grad_model = tf.keras.models.Model(
-        inputs=model.inputs,
-        outputs=[base_model_layer.output if base_model_layer else model.layers[-3].output, model.output]
+        inputs=model.input,
+        outputs=[last_conv_layer.output, model.output]
     )
     
     # Compute gradient of predicted class with respect to feature map
@@ -354,8 +341,6 @@ def predict():
         img_array, original_img = preprocess_image(filepath)
         print(f"[2/5] Image preprocessed - Shape: {img_array.shape}, Min: {img_array.min():.3f}, Max: {img_array.max():.3f}")
         
-        tf.keras.backend.clear_session()
-        
         predictions = model.predict(img_array, verbose=0)
         print(f"[3/5] Model prediction completed")
         print(f"      Raw predictions: {predictions[0]}")
@@ -379,21 +364,8 @@ def predict():
         print(f"[5/5] FINAL PREDICTION: {prediction_label} (Confidence: {confidence:.2f}%)")
         print(f"{'='*70}\n")
         
-        try:
-            heatmap = make_gradcam_heatmap(img_array, model, pred_index=predicted_class)
-            gradcam_bytes = overlay_heatmap(heatmap, original_img)
-            
-            gradcam_filename = f'gradcam_{unique_filename}'
-            gradcam_path = os.path.join(app.config['UPLOAD_FOLDER'], gradcam_filename)
-            with open(gradcam_path, 'wb') as f:
-                f.write(gradcam_bytes.read())
-            
-            gradcam_url = f'/gradcam/{gradcam_filename}'
-        except Exception as gradcam_error:
-            print(f"Grad-CAM error: {str(gradcam_error)}")
-            import traceback
-            traceback.print_exc()
-            gradcam_url = None
+        gradcam_url = None
+        print("Note: Grad-CAM visualization temporarily disabled for loaded models")
         
         result = {
             'prediction': class_names[predicted_class],
