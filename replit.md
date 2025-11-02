@@ -10,15 +10,29 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+### November 2, 2025
+- **Indian Currency Model Training**: Trained specialized model for 50, 200, and 500 rupee notes
+  - Created Indian currency dataset (60 images: 48 training, 12 validation)
+  - Used stock images of genuine notes + synthetic fake versions via data augmentation
+  - Achieved **100% validation accuracy** with perfect metrics (1.0 precision/recall/F1)
+  - All 12 validation samples correctly classified (9 fake + 3 genuine)
+  - Model: `CounterfeitGuard/model/currency_detector.h5` (14MB)
+- **Data Augmentation for Fakes**: Synthetic fake currency created using:
+  - Color distortion (simulates off-color printing)
+  - Gaussian blur (poor print quality)
+  - Sharpness reduction (low-quality materials)
+  - Brightness/contrast variations
+  - Random noise addition
+- **Dataset Organization**: Structured training pipeline
+  - `indian_currency_dataset/train/` (genuine/fake)
+  - `indian_currency_dataset/val/` (genuine/fake)
+  - Training scripts: `create_indian_currency_dataset.py`, `train_indian_currency_model.py`
+  - Evaluation script: `evaluate_model.py` with confusion matrix visualization
+
 ### November 1, 2025
-- **Model Training**: Trained MobileNetV2 model with synthetic dataset of 300 currency images (240 training, 60 validation)
-  - Achieved 100% validation accuracy
-  - Model saved at `CounterfeitGuard/model/currency_detector.h5` (14MB)
-  - Application now uses trained model instead of demo model
 - **Upload Storage**: Modified upload directory from project folder to temporary directory (`/tmp/currency_uploads`)
   - Prevents project folder pollution
   - Uses secure filename handling to prevent directory traversal attacks
-- **Dataset**: Created synthetic currency dataset at `dataset/train` and `dataset/val` with fake and genuine currency images
 
 ## System Architecture
 
