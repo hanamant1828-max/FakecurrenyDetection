@@ -339,8 +339,18 @@ def predict():
         
         # Make prediction
         predictions = model.predict(img_array, verbose=0)
-        predicted_class = np.argmax(predictions[0])
-        confidence = float(predictions[0][predicted_class]) * 100
+        
+        # predictions[0] contains [fake_probability, genuine_probability]
+        fake_prob = float(predictions[0][0]) * 100
+        genuine_prob = float(predictions[0][1]) * 100
+        
+        # Determine prediction based on which probability is higher
+        if genuine_prob > fake_prob:
+            predicted_class = 1  # Genuine
+            confidence = genuine_prob
+        else:
+            predicted_class = 0  # Fake
+            confidence = fake_prob
         
         # Generate Grad-CAM heatmap
         try:
@@ -368,8 +378,8 @@ def predict():
             'confidence': round(confidence, 2),
             'is_genuine': bool(predicted_class == 1),
             'probabilities': {
-                'fake': round(float(predictions[0][0]) * 100, 2),
-                'genuine': round(float(predictions[0][1]) * 100, 2)
+                'fake': round(fake_prob, 2),
+                'genuine': round(genuine_prob, 2)
             },
             'warning': 'This model was trained on synthetic data. Results may not be accurate for real currency.'
         }
