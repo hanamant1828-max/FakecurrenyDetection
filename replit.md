@@ -10,7 +10,36 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
-### November 2, 2025
+### November 2, 2025 (Afternoon Update)
+- **Fixed Prediction Caching Issue**: Resolved critical bug where first image's prediction was being reused
+  - Added unique timestamp-based filenames to prevent file conflicts
+  - Implemented `tf.keras.backend.clear_session()` to clear TensorFlow session state before each prediction
+  - Added comprehensive debugging output showing image path, array stats, and raw predictions for each request
+  - Each prediction now creates a completely fresh image array and preprocessing pipeline
+  
+- **Retrained Model for ₹500 Notes Only**:
+  - Created dedicated training script: `train_rupee_500_model.py`
+  - Dataset: 28 training images (16 fake + 12 genuine), 7 validation images (4 fake + 3 genuine)
+  - Two-phase training approach:
+    - Phase 1: 30 epochs with frozen MobileNetV2 base
+    - Phase 2: 20 epochs fine-tuning last 30 layers
+  - **Final Results**: 100% training accuracy, 100% validation accuracy
+  - Model size: 24.79 MB
+  - Heavy data augmentation: rotation, shift, shear, zoom, brightness, horizontal flip
+  
+- **UI Updates for ₹500 Specificity**:
+  - Updated page title to "Indian ₹500 Note Detector"
+  - Changed upload prompt to specifically mention ₹500 notes
+  - Result messages now show "GENUINE ₹500 NOTE" or "FAKE ₹500 NOTE"
+  - Updated info banner to highlight model is trained specifically for ₹500 notes
+  - Improved "Upload Another" button with clear ₹500 note reference
+  
+- **Code Quality Improvements**:
+  - Added detailed comments explaining fresh array creation in preprocessing
+  - Extensive logging for debugging prediction caching issues
+  - Improved model info response to indicate ₹500 note specialization
+
+### November 2, 2025 (Morning)
 - **Kaggle Dataset Integration & Model Training**: Successfully integrated Kaggle API for dataset management
   - Installed Kaggle package and configured API authentication using environment secrets
   - Downloaded and organized Indian currency counterfeit detection dataset
