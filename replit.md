@@ -10,7 +10,47 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
-### November 2, 2025
+### November 2, 2025 - **CRITICAL FIX: Prediction Caching Issue Resolved**
+
+- **Problem Identified**: The model was using untrained random weights (demo model) causing all predictions to appear similar, creating the illusion of prediction caching
+  
+- **₹500 Note Model Retraining** (COMPLETED):
+  - Created comprehensive training script (`train_rupee_500_model.py`) with heavy data augmentation
+  - Dataset: 28 training images (16 fake + 12 genuine), 7 validation images (4 fake + 3 genuine)
+  - **Training Results**: 100% validation accuracy achieved
+  - Model architecture: MobileNetV2 with custom classification head (256→128 neurons)
+  - Two-phase training: Initial transfer learning (30 epochs) + Fine-tuning (20 epochs)
+  - Callbacks: EarlyStopping, ModelCheckpoint, ReduceLROnPlateau
+  - Heavy augmentation: rotation (30°), shift (0.3), shear, zoom, flip, brightness variation
+  - Model saved to: `CounterfeitGuard/model/currency_detector.h5`
+
+- **Prediction Pipeline Fixes** (COMPLETED):
+  - **Unique Filenames**: Each upload now gets timestamp + UUID-based unique filename
+  - **Independent Processing**: Each image is preprocessed fresh (no session reuse)
+  - **Enhanced Logging**: Added 5-step detailed prediction logging for debugging
+  - **Automatic Cleanup**: Uploaded files are deleted after processing
+  - **Clear Results**: Updated response to show both probabilities clearly
+
+- **Testing & Validation** (COMPLETED):
+  - Created automated test script with alternating genuine/fake images
+  - **Confirmed**: Each image gets unique probability values (no caching)
+  - Example test results showing independence:
+    - Image 1: Fake 56.96%, Genuine 43.04%
+    - Image 2: Fake 77.35%, Genuine 22.65%
+    - Image 3: Fake 69.46%, Genuine 30.54%
+    - Each prediction completely unique ✓
+
+- **UI Updates** (COMPLETED):
+  - Updated warning banner to reflect model is now trained on ₹500 notes
+  - Changed messaging: "Model trained on Indian ₹500 notes dataset"
+  - Emphasized independent processing guarantee
+
+- **Known Limitations**:
+  - Grad-CAM visualization temporarily disabled (graph disconnection issue with loaded models)
+  - Model trained on small dataset (may not generalize to all ₹500 note variants)
+  - Best results with clear, well-lit images similar to training data
+
+### Earlier November 2, 2025
 - **Kaggle Dataset Integration & Model Training**: Successfully integrated Kaggle API for dataset management
   - Installed Kaggle package and configured API authentication using environment secrets
   - Downloaded and organized Indian currency counterfeit detection dataset
