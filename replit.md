@@ -10,6 +10,37 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+### November 3, 2025 - Multi-Denomination Architecture
+- **Separate Currency Detectors for Each Denomination**: Implemented independent AI models for ₹100, ₹200, and ₹500 notes
+  - Created denomination-specific model architecture with three separate trained models
+  - Models stored as: `currency_detector_500.h5`, `currency_detector_200.h5`, `currency_detector_100.h5`
+  - Each model: 14MB in size using MobileNetV2 transfer learning
+  
+- **Updated UI for Denomination Selection**:
+  - Added dropdown selector allowing users to choose denomination before uploading
+  - Dynamic upload text updates based on selected denomination
+  - Results now display denomination-specific messages (e.g., "GENUINE ₹500 NOTE")
+  - Enhanced user experience with clear denomination indication
+  
+- **Backend Architecture Updates**:
+  - Modified `/predict` endpoint to accept denomination parameter
+  - All three models load at startup and remain in memory for fast predictions
+  - Fixed critical bug: Removed `tf.keras.backend.clear_session()` that was invalidating cached models
+  - Each denomination uses its dedicated model instance for predictions
+  
+- **Training Infrastructure**:
+  - Created `train_denomination_models.py` for denomination-specific model training
+  - Dataset structure: `dataset_training/{100,200,500}/train/{fake,genuine}` and `val/{fake,genuine}`
+  - Training configuration: Two-phase approach (frozen base + fine-tuning)
+  - Current dataset: 327 training images and 82 validation images per denomination
+  - Documentation added in `TRAINING_README.md` for training new models
+  
+- **Model Loading**:
+  - Application successfully loads all three trained models at startup
+  - Verified in logs: "Model for ₹500/₹200/₹100 loaded successfully"
+  - Fallback to demo models if trained models not found
+  - No session clearing - models remain valid throughout application lifecycle
+
 ### November 2, 2025 (Afternoon Update)
 - **Fixed Prediction Caching Issue**: Resolved critical bug where first image's prediction was being reused
   - Added unique timestamp-based filenames to prevent file conflicts
@@ -98,6 +129,7 @@ Preferred communication style: Simple, everyday language.
 - **Session Management**: Flask-Login for user authentication with session-based authentication
 
 ### Machine Learning Architecture
+- **Multi-Denomination System**: Separate models for each denomination (₹100, ₹200, ₹500)
 - **Base Model**: MobileNetV2 pre-trained on ImageNet (transfer learning approach)
 - **Model Structure**:
   - Frozen MobileNetV2 base for feature extraction
@@ -107,6 +139,7 @@ Preferred communication style: Simple, everyday language.
   - Softmax output for binary classification (genuine/fake)
 - **Input**: 224x224x3 RGB images
 - **Training Strategy**: Two-phase training (frozen base, then fine-tuning)
+- **Model Management**: All three models loaded at startup and cached in memory
 - **Visualization**: Grad-CAM implementation for explainable AI - highlights image regions influencing predictions
 
 ### Data Storage
