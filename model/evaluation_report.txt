@@ -1,77 +1,22 @@
-2025-11-02 05:40:03.336329: I external/local_tsl/tsl/cuda/cudart_stub.cc:31] Could not find cuda drivers on your machine, GPU will not be used.
-2025-11-02 05:40:03.409854: E external/local_xla/xla/stream_executor/cuda/cuda_dnn.cc:9261] Unable to register cuDNN factory: Attempting to register factory for plugin cuDNN when one has already been registered
-2025-11-02 05:40:03.410258: E external/local_xla/xla/stream_executor/cuda/cuda_fft.cc:607] Unable to register cuFFT factory: Attempting to register factory for plugin cuFFT when one has already been registered
-2025-11-02 05:40:03.414427: E external/local_xla/xla/stream_executor/cuda/cuda_blas.cc:1515] Unable to register cuBLAS factory: Attempting to register factory for plugin cuBLAS when one has already been registered
-2025-11-02 05:40:03.449619: I external/local_tsl/tsl/cuda/cudart_stub.cc:31] Could not find cuda drivers on your machine, GPU will not be used.
-2025-11-02 05:40:03.450671: I tensorflow/core/platform/cpu_feature_guard.cc:182] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
-To enable the following instructions: AVX2 FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
-2025-11-02 05:40:06.168086: W tensorflow/compiler/tf2tensorrt/utils/py_utils.cc:38] TF-TRT Warning: Could not find TensorRT
-======================================================================
-INDIAN CURRENCY COUNTERFEIT DETECTION - MODEL EVALUATION
-======================================================================
-Loading model from model/indian_currency_detector_best.h5...
-✓ Model loaded successfully
+Currency Detection Model Evaluation
+============================================================
 
-======================================================================
-EVALUATING ON VALIDATION SET
-======================================================================
-Found 12 images belonging to 2 classes.
-Validation samples: 12
-Classes: {'fake': 0, 'genuine': 1}
+Validation Loss: 0.4597
+Validation Accuracy: 0.7561 (75.61%)
 
-Evaluating...
-
-======================================================================
-VALIDATION RESULTS
-======================================================================
-Accuracy: 100.00%
-Loss: 0.2528
-
-Generating predictions...
-
-Confusion Matrix:
-======================================================================
-                 Predicted
-               Fake  Genuine
-Actual  Fake      9       0
-      Genuine    0       3
-
-======================================================================
-DETAILED CLASSIFICATION REPORT
-======================================================================
+Classification Report:
               precision    recall  f1-score   support
 
-        fake     1.0000    1.0000    1.0000         9
-     genuine     1.0000    1.0000    1.0000         3
+        Fake       0.92      0.37      0.52        30
+     Genuine       0.73      0.98      0.84        52
 
-    accuracy                         1.0000        12
-   macro avg     1.0000    1.0000    1.0000        12
-weighted avg     1.0000    1.0000    1.0000        12
+    accuracy                           0.76        82
+   macro avg       0.82      0.67      0.68        82
+weighted avg       0.80      0.76      0.72        82
 
 
-======================================================================
-SAMPLE PREDICTIONS
-======================================================================
-✓ fake/fake_genuine_0000_aug0.jpg                    | True: fake     | Pred: fake     ( 75.0%)
-✓ fake/fake_genuine_0000_aug1.jpg                    | True: fake     | Pred: fake     ( 91.4%)
-✓ fake/fake_genuine_0000_aug2.jpg                    | True: fake     | Pred: fake     ( 92.8%)
-✓ fake/fake_genuine_0001_aug0.jpg                    | True: fake     | Pred: fake     ( 94.7%)
-✓ fake/fake_genuine_0001_aug1.jpg                    | True: fake     | Pred: fake     ( 85.8%)
-✓ fake/fake_genuine_0001_aug2.jpg                    | True: fake     | Pred: fake     ( 95.0%)
-✓ fake/fake_genuine_0002_aug0.jpg                    | True: fake     | Pred: fake     ( 82.9%)
-✓ fake/fake_genuine_0002_aug1.jpg                    | True: fake     | Pred: fake     ( 68.5%)
-✓ fake/fake_genuine_0002_aug2.jpg                    | True: fake     | Pred: fake     ( 59.7%)
-✓ genuine/genuine_0000.jpg                           | True: genuine  | Pred: genuine  ( 71.5%)
-✓ genuine/genuine_0001.jpg                           | True: genuine  | Pred: genuine  ( 56.7%)
-✓ genuine/genuine_0002.jpg                           | True: genuine  | Pred: genuine  ( 71.5%)
-
-✓ Confusion matrix saved to model/confusion_matrix.png
-
-======================================================================
-EVALUATION COMPLETE!
-======================================================================
-Final Validation Accuracy: 100.00%
-
-Output files:
-  • model/confusion_matrix.png
-======================================================================
+Confusion Matrix:
+               Predicted
+             Fake  Genuine
+Actual Fake     11      19
+      Genuine    1      51
