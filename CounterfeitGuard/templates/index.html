@@ -5,18 +5,30 @@
 {% block content %}
 <div class="card">
     <div class="card-header text-center">
-        <h1 class="card-title">💵 Indian ₹500 Note Detector</h1>
-        <p class="card-subtitle">AI-powered counterfeit detection for ₹500 notes using Deep Learning</p>
+        <h1 class="card-title">💵 Indian Currency Detector</h1>
+        <p class="card-subtitle">AI-powered counterfeit detection for ₹100, ₹200 & ₹500 notes using Deep Learning</p>
     </div>
 
     <div style="background: #d1ecf1; border: 2px solid #17a2b8; border-radius: 8px; padding: 15px; margin: 20px 0; color: #0c5460;">
-        <strong>ℹ️ Model Information:</strong> This model is specifically trained to detect counterfeit Indian ₹500 notes. 
-        Upload a clear image of a ₹500 note to check if it's genuine or fake. The model achieved 100% validation accuracy during training.
+        <strong>ℹ️ Model Information:</strong> Our system uses separate AI models specifically trained to detect counterfeit Indian currency notes. 
+        Select the denomination and upload a clear image to check if it's genuine or fake.
+    </div>
+
+    <!-- Denomination Selector -->
+    <div style="margin-bottom: 30px;">
+        <label for="denominationSelect" style="display: block; margin-bottom: 10px; font-weight: bold; font-size: 1.1em; color: var(--text-dark);">
+            Select Note Denomination:
+        </label>
+        <select id="denominationSelect" style="width: 100%; padding: 12px; font-size: 1.1em; border: 2px solid var(--primary-color); border-radius: 8px; background: white; cursor: pointer;">
+            <option value="500">₹500 (Five Hundred Rupees)</option>
+            <option value="200">₹200 (Two Hundred Rupees)</option>
+            <option value="100">₹100 (One Hundred Rupees)</option>
+        </select>
     </div>
 
     <div class="upload-area" id="uploadArea">
         <div class="upload-icon">📤</div>
-        <div style="font-size: 1.2em; margin-bottom: 10px; color: var(--text-medium);">Upload Indian ₹500 Note Image</div>
+        <div id="uploadText" style="font-size: 1.2em; margin-bottom: 10px; color: var(--text-medium);">Upload Indian Currency Note Image</div>
         <div style="color: var(--text-light); font-size: 0.9em;">Click to upload or drag and drop • PNG, JPG or JPEG (max 16MB)</div>
         <input type="file" id="fileInput" accept="image/png,image/jpeg,image/jpg">
     </div>
@@ -56,7 +68,7 @@
         </div>
 
         <div class="text-center mt-4">
-            <button class="btn" onclick="location.reload()" style="font-size: 1.1em; padding: 12px 30px;">🔄 Upload Another ₹500 Note</button>
+            <button class="btn" onclick="location.reload()" style="font-size: 1.1em; padding: 12px 30px;">🔄 Upload Another Note</button>
         </div>
     </div>
 </div>
@@ -71,8 +83,16 @@
     const analyzeBtn = document.getElementById('analyzeBtn');
     const loading = document.getElementById('loading');
     const results = document.getElementById('results');
+    const denominationSelect = document.getElementById('denominationSelect');
+    const uploadText = document.getElementById('uploadText');
 
     let selectedFile = null;
+
+    // Update upload text when denomination changes
+    denominationSelect.addEventListener('change', () => {
+        const denom = denominationSelect.value;
+        uploadText.textContent = `Upload Indian ₹${denom} Note Image`;
+    });
 
     uploadArea.addEventListener('click', () => fileInput.click());
 
@@ -125,6 +145,7 @@
 
         const formData = new FormData();
         formData.append('file', selectedFile);
+        formData.append('denomination', denominationSelect.value);
 
         try {
             const response = await fetch('/predict', {
@@ -153,12 +174,14 @@
         const genuineProbability = document.getElementById('genuineProbability');
         const gradcamImage = document.getElementById('gradcamImage');
 
+        const denomination = data.denomination || denominationSelect.value;
+
         if (data.is_genuine) {
-            resultHeader.textContent = '✓ GENUINE ₹500 NOTE';
+            resultHeader.textContent = `✓ GENUINE ₹${denomination} NOTE`;
             resultHeader.style.color = 'var(--success-color)';
             results.style.border = '3px solid var(--success-color)';
         } else {
-            resultHeader.textContent = '⚠ FAKE ₹500 NOTE';
+            resultHeader.textContent = `⚠ FAKE ₹${denomination} NOTE`;
             resultHeader.style.color = 'var(--danger-color)';
             results.style.border = '3px solid var(--danger-color)';
         }

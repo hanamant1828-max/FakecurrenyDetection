@@ -60,9 +60,14 @@ def load_user(user_id):
 # Create uploads directory
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
-# Global variable to store model
-model = None
+# Global variables to store models for each denomination
+models = {
+    '500': None,
+    '200': None,
+    '100': None
+}
 class_names = ['Fake', 'Genuine']
+DENOMINATIONS = ['500', '200', '100']
 
 
 def allowed_file(filename):
@@ -71,28 +76,29 @@ def allowed_file(filename):
 
 
 def load_model_file():
-    """Load the trained model"""
-    global model
+    """Load the trained models for all denominations"""
+    global models
     
-    # Only load if not already loaded
-    if model is not None:
-        return
+    # Use absolute path for models directory
+    models_dir = os.path.join(basedir, 'models')
+    os.makedirs(models_dir, exist_ok=True)
     
-    # Use absolute path for model
-    model_path = os.path.join(basedir, 'model', 'currency_detector.h5')
-    
-    if os.path.exists(model_path):
-        model = keras.models.load_model(model_path)
-        print(f"Model loaded successfully from {model_path}")
-    else:
-        # Create a simple demo model if no trained model exists
-        print(f"No trained model found at {model_path}. Creating demo model...")
-        from CounterfeitGuard.model import create_model
-        model = create_model()
-        print("Demo model created. Train a real model for better accuracy.")
+    # Load model for each denomination
+    for denomination in DENOMINATIONS:
+        model_path = os.path.join(models_dir, f'currency_detector_{denomination}.h5')
+        
+        if os.path.exists(model_path):
+            models[denomination] = keras.models.load_model(model_path)
+            print(f"Model for ₹{denomination} loaded successfully from {model_path}")
+        else:
+            # Create a simple demo model if no trained model exists
+            print(f"No trained model found for ₹{denomination} at {model_path}. Creating demo model...")
+            from CounterfeitGuard.model import create_model
+            models[denomination] = create_model()
+            print(f"Demo model created for ₹{denomination}. Train a real model for better accuracy.")
 
 
-# Load model on app initialization
+# Load models on app initialization
 with app.app_context():
     load_model_file()
 
@@ -340,6 +346,16 @@ def predict():
     if not allowed_file(file.filename):
         return jsonify({'error': 'Invalid file type. Use PNG, JPG, or JPEG'}), 400
     
+    # Get denomination from form data
+    denomination = request.form.get('denomination', '500')
+    if denomination not in DENOMINATIONS:
+        return jsonify({'error': f'Invalid denomination. Choose from {", ".join(DENOMINATIONS)}'}), 400
+    
+    # Get the appropriate model for this denomination
+    model = models.get(denomination)
+    if model is None:
+        return jsonify({'error': f'Model for ₹{denomination} not loaded'}), 500
+    
     try:
         # CRITICAL FIX: Use unique filename with timestamp to avoid file caching
         import time
@@ -353,9 +369,7 @@ def predict():
         print(f"\n{'='*60}")
         print(f"NEW PREDICTION REQUEST - File: {filename}")
         print(f"Saved to: {filepath}")
-        
-        # CRITICAL FIX: Clear TensorFlow backend to prevent session caching
-        tf.keras.backend.clear_session()
+        print(f"Denomination: ₹{denomination}")
         
         # Preprocess image - creates NEW array each time
         print("Preprocessing image...")
@@ -416,11 +430,12 @@ def predict():
             'prediction': class_names[predicted_class],
             'confidence': round(confidence, 2),
             'is_genuine': bool(predicted_class == 1),
+            'denomination': denomination,
             'probabilities': {
                 'fake': round(fake_prob, 2),
                 'genuine': round(genuine_prob, 2)
             },
-            'model_info': 'Trained specifically for Indian ₹500 notes with 100% validation accuracy'
+            'model_info': f'Detection for Indian ₹{denomination} notes'
         }
         
         if gradcam_url:
@@ -455,29 +470,39 @@ def testing():
 @login_required
 def model_info():
     """Return model information for testing"""
-    if model is None:
-        return jsonify({'error': 'Model not loaded'}), 500
-    
     try:
-        # Get model summary
-        layer_info = []
-        for layer in model.layers:
-            layer_info.append({
-                'name': layer.name,
-                'type': layer.__class__.__name__,
-                'output_shape': str(layer.output_shape) if hasattr(layer, 'output_shape') else 'N/A'
-            })
+        models_info = {}
+        models_dir = os.path.join(basedir, 'models')
         
-        # Check if model is trained or demo
-        model_path = 'model/currency_detector.h5'
-        is_trained = os.path.exists(model_path)
+        for denomination in DENOMINATIONS:
+            model = models.get(denomination)
+            if model is None:
+                models_info[denomination] = {'status': 'Not loaded'}
+                continue
+            
+            # Get model summary
+            layer_info = []
+            for layer in model.layers:
+                layer_info.append({
+                    'name': layer.name,
+                    'type': layer.__class__.__name__,
+                    'output_shape': str(layer.output_shape) if hasattr(layer, 'output_shape') else 'N/A'
+                })
+            
+            # Check if model is trained or demo
+            model_path = os.path.join(models_dir, f'currency_detector_{denomination}.h5')
+            is_trained = os.path.exists(model_path)
+            
+            models_info[denomination] = {
+                'model_type': 'Trained Model' if is_trained else 'Demo Model (Random Weights)',
+                'total_layers': len(model.layers),
+                'input_shape': str(model.input_shape),
+                'output_shape': str(model.output_shape),
+            }
         
         return jsonify({
-            'model_type': 'Trained Model' if is_trained else 'Demo Model (Random Weights)',
-            'total_layers': len(model.layers),
-            'layers': layer_info,
-            'input_shape': str(model.input_shape),
-            'output_shape': str(model.output_shape),
+            'denominations': DENOMINATIONS,
+            'models': models_info,
             'class_names': class_names
         })
     except Exception as e:
